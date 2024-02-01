@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
             break;
         case 2:
 
-            char from[MAX_LENGTH], to[MAX_LENGTH], subject[MAX_LENGTH], input[MAX_LENGTH],message[MAX_LENGTH * 50];
+            char from[MAX_LENGTH], to[MAX_LENGTH], subject[MAX_LENGTH], input[MAX_LENGTH], message[MAX_LENGTH * 50];
             int from_flag = 0, to_flag = 0, subject_flag = 0;
 
             // initilazing message to NULL so the previous content of the message is not concatenated with the new message
@@ -69,53 +69,83 @@ int main(int argc, char *argv[])
                 if (count == 0)
                 {
                     strcpy(from, input);
-                    printf("From message received: %s",from);
+                    printf("From message received: %s", from);
 
                     // Cheching whether the from message is of the correct format or not :
-                    if(strstr(from,"From: ")!= from || strchr(from,'@')==NULL)
+                    if (strstr(from, "From: ") != from || strchr(from, '@') == NULL)
                     {
                         from_flag = 1;
                     }
+
+                    // Find the position of '@' symbol
+                    char *at_position = strchr(from, '@');
+
+                    if (at_position == NULL)
+                    {
+                        printf("Invalid format: '@' symbol not found.\n");
+                        return 1;
+                    }
+
+                    // Extract username
+                    char *username_start = strstr(from, ": ") + 2; // Skip "From: "
+                    char *username_end = at_position;
+                    int username_length = username_end - username_start;
+                    char username[username_length + 1];
+                    strncpy(username, username_start, username_length);
+                    username[username_length] = '\0';
+                    
+                    // Extract domain name
+                    char *domain_start = at_position + 1;
+                    char *domain_end = strchr(domain_start, '\n');
+                    int domain_length = domain_end - domain_start;
+                    char domain[domain_length + 1];
+                    strncpy(domain, domain_start, domain_length);
+                    domain[domain_length] = '\0';
+
+                    printf("Username: %s\n", username);
+                    printf("Domain (as string): %s\n", domain);
+
                     count++;
                 }
                 else if (count == 1)
                 {
                     strcpy(to, input);
-                    printf("To message received: %s",to);
+                    printf("To message received: %s", to);
 
                     // Cheching whether the to message is of the correct format or not :
-                    if(strstr(to,"To: ")!= to || strchr(to,'@')==NULL)
+                    if (strstr(to, "To: ") != to || strchr(to, '@') == NULL)
                     {
                         to_flag = 1;
                     }
+
                     count++;
                 }
-                else if(count == 2)
+                else if (count == 2)
                 {
                     strcpy(subject, input);
-                    printf("Subject message received: %s",subject);
+                    printf("Subject message received: %s", subject);
 
                     // Cheching whether the subject message is of the correct format or not :
-                    if(strstr(subject,"Subject: ")!= subject)
+                    if (strstr(subject, "Subject: ") != subject)
                     {
                         subject_flag = 1;
                     }
                     count++;
                 }
-                else 
+                else
                 {
-                    strcat(message,input);
+                    strcat(message, input);
                 }
             }
 
             // Checking whether the from and to messages are of the correct format or not :
-            if(from_flag == 1 || to_flag == 1 || subject_flag == 1)
+            if (from_flag == 1 || to_flag == 1 || subject_flag == 1)
             {
                 printf("Incorrect format\n");
                 break;
             }
 
-            printf("%s%s%s",from,to,message);
+            printf("%s%s%s", from, to, message);
 
         case 3:
             printf("Quitting program\n");
