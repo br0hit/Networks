@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
+
 #define MAX 100
 
 int main()
@@ -63,42 +64,33 @@ int main()
 
 			close(sockfd);
 
-			// receive until "\r\n"
-			char message[MAX];
-			for (int i = 0; i < MAX; i++)
-			{
-				message[i] = '\0';
-			}
+            // receive until "\r\n"
+            char message[MAX];
+            for(int i=0;i<MAX;i++){
+                message[i]='\0';
+            }
 
-			while (1)
-			{
-				ssize_t bytes = recv(newsockfd, buf, MAX, 0);
-				if (bytes < 0)
-				{
-					printf("Error in receiving\n");
-					exit(0);
-				}
+            while(1){
+            ssize_t bytes=recv(newsockfd,buf,MAX,0);
+            if(bytes<0){
+                printf("Error in receiving\n");
+                exit(0);
+            }
+            
+            if(strstr(buf,"\r\n")) {
+            // sz=write(fd,buf,bytes-5);
+            buf[bytes-2]='\0';
+            strcat(message,buf);
+            break;
+            }
+            else{
+                strcat(message,buf);
+            }
+            }
 
-				if (strstr(buf, "\r\n"))
-				{
-					// sz=write(fd,buf,bytes-5);
-					buf[bytes - 2] = '\0';
-					strcat(message, buf);
-					break;
-				}
-				else
-				{
-					strcat(message, buf);
-				}
-			}
+            printf("Message received from client: %s\n",message);
 
-			// Checkin if the message received is "client connects to SMTP port" by string matching 
 
-			char *first_msg = "<client connects to SMTP port>";
-
-			if(strcmp(first_msg,buf)==0) printf("220\n");
-
-			printf("Message received from client: %s\n", message);
 
 			close(newsockfd);
 			exit(0);

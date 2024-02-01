@@ -7,6 +7,8 @@
 
 #define BUFFER_SIZE 1024
 #define MAX_LENGTH 1000
+#define MAX 100
+
 
 // Function to send commands to SMTP server and receive responses
 void send_command(int sockfd, char *command, char *response)
@@ -83,7 +85,7 @@ int main(int argc, char *argv[])
                     if (at_position == NULL)
                     {
                         printf("Invalid format: '@' symbol not found.\n");
-                        return 1;
+                        break;
                     }
 
                     // Extract username
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
                     char username[username_length + 1];
                     strncpy(username, username_start, username_length);
                     username[username_length] = '\0';
-                    
+
                     // Extract domain name
                     char *domain_start = at_position + 1;
                     char *domain_end = strchr(domain_start, '\n');
@@ -146,6 +148,43 @@ int main(int argc, char *argv[])
             }
 
             printf("%s%s%s", from, to, message);
+
+            int sockfd;
+            struct sockaddr_in serv_addr;
+            int fd;
+
+            int i;
+            char buf[MAX]; /* Opening a socket is exactly similar to the server process */
+
+            serv_addr.sin_family = AF_INET;
+            inet_aton("127.0.0.1", &serv_addr.sin_addr);
+            serv_addr.sin_port = htons(9000);
+
+            char inputfilename[MAX];
+            int k;
+
+            // while(1){
+
+            if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+            {
+                perror("Unable to create socket\n");
+                exit(0);
+            }
+
+            // connecting to the server
+            if ((connect(sockfd, (struct sockaddr *)&serv_addr,
+                         sizeof(serv_addr))) < 0)
+            {
+                perror("Unable to connect to server\n");
+                exit(0);
+            }
+
+            printf("Connected to server\n");
+
+            char msg[MAX] = "<client connects to SMTP port>";
+            send(sockfd, msg, strlen(msg), 0);
+            send(sockfd, "\r\n", 2, 0);
+            printf("%s sent to server\n", msg);
 
         case 3:
             printf("Quitting program\n");
